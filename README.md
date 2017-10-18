@@ -1,38 +1,17 @@
 ## [Project Name]
 
-This project is a template for python scientific projects. This template comes with utilities to easily setup continuous integration, project configurations and more. More details in [INSTRUCTIONS.md](INSTRUCTIONS.md).
+This project is the companion code to the paper XXX.
 
 [![CheckHowThisButtonIsDoneToAdaptItToYourProject](https://travis-ci.org/[your_username]/[project_name].svg?branch=[branch_to_test])](https://travis-ci.org/[your_username]/[project_name])
 
 
-
 > project description
 
-[Project Name] is a library implementing time-travel equations based on incomplete scarce agile data. This project is used to build flux capacitors.  More information about this project can be found in my third book.
-
-## Download
-
-### Pre requirements
-
-[Project Name] requires a previous installation of radioactive filters in your machine. You can do it on linux by executing
-
-```bash
-sudo apt-get radioactive-filters
-```
-
-or in mac and windows by following the instructions on this webpage: http://cool.radioactive.filters
-
-### Install using `pip`
-
-You can find this package in the Python package index and install it using `pip`
-
-```bash
-pip install [project_name]
-````
+[hyperbolic] is a Python 3 library implementing the analytic wavelet transform of a white Gaussian noise on the Hardy space $H^2$.
 
 ### Install from sources
 
-Clone this repository
+Clone (or download) this repository
 
 ```bash
 git clone https://github.com/[myself]/[project_name].git
@@ -45,7 +24,7 @@ And execute `setup.py`
 pip install .
 ```
 
-Of course, if you're in development mode and you want to install also dev packages, documentation and/or tests, you can do as follows:
+If you're in development mode and you want to install also dev packages, documentation and/or tests, you can do as follows:
 
 ```bash
 pip install -e .
@@ -53,16 +32,18 @@ pip install -e .
 
 ## Usage examples
 
-You can import [my package] by doing
+You can import [hyperbolic] by doing
 
 ```python
-import my_package as mp
+import hyperbolic as hype
 ```
 
-The main functions included in this package are `x()` and `z()`. `x` receives A as argument and does X. Here is example of its usage:
+The experiments in the paper are run using the class `Experiment`. Here is an example of its usage:
 
 ```python
-x(`hello`, `world`, 27, [])
+xp = hype.Experiment()
+xp.sampleWhiteNoise()
+xp.performAWT()
+xp.findZeros()
+xp.plotResults(boolShow=1) # plots the resulting signal and scalogram, and saves the figures
 ```
-
-A more detailed documentation can be found in [link].
