@@ -1,4 +1,4 @@
-## [hyperbolic]
+## hyperbolic
 
 This project is the companion code to the paper XXX.
 
@@ -7,7 +7,7 @@ This project is the companion code to the paper XXX.
 
 > project description
 
-_hyperbolic_ is a Python 3 library implementing the analytic wavelet transform of a white Gaussian noise on the Hardy space $H^2$.
+_hyperbolic_ is a Python 3 library implementing Paul's continuous wavelet transform of an analytic white Gaussian noise, see XXX for details.
 
 ### Install from sources
 
