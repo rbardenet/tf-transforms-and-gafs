@@ -1,4 +1,4 @@
-## [Project Name]
+## [hyperbolic]
 
 This project is the companion code to the paper XXX.
 
