@@ -18,7 +18,7 @@ git clone https://github.com/rbardenet/hyperbolic.git
 cd hyperbolic
 ```
 
-And execute `setup.py`
+and execute `setup.py`
 
 ```bash
 pip install .
@@ -32,7 +32,7 @@ pip install -e .
 
 ## Usage examples
 
-You can import [hyperbolic] by doing
+You can import *hyperbolic* by doing
 
 ```python
 import hyperbolic as hype
