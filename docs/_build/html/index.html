@@ -1,0 +1,238 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to hyperbolic’s documentation! &mdash; hyperbolic 0.1.alpha documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="hyperbolic 0.1.alpha documentation" href="#"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="#" class="fa fa-home"> hyperbolic</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="simple">
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">hyperbolic</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>Welcome to hyperbolic&#8217;s documentation!</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="welcome-to-hyperbolic-s-documentation">
+<h1>Welcome to hyperbolic&#8217;s documentation!<a class="headerlink" href="#welcome-to-hyperbolic-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p><cite>hyperbolic</cite> is the companion code to the paper XXX.</p>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+<div class="section" id="running-the-paper-s-experiments">
+<h1>Running the paper&#8217;s experiments<a class="headerlink" href="#running-the-paper-s-experiments" title="Permalink to this headline">¶</a></h1>
+<p>The main class implements a complete experiment.</p>
+<blockquote>
+<div><dl class="class">
+<dt id="hyperbolic.Experiment">
+<em class="property">class </em><code class="descclassname">hyperbolic.</code><code class="descname">Experiment</code><span class="sig-paren">(</span><em>expId='demo'</em>, <em>N=1024</em>, <em>M=100000</em>, <em>alpha=0.0</em>, <em>A=5</em><span class="sig-paren">)</span><a class="headerlink" href="#hyperbolic.Experiment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample an analytic white noise, compute its AWT, and look up its zeros.</p>
+<blockquote>
+<div><p>expId &#8211; a string identifying a particular experiment, used for saving results.</p>
+<p>N &#8211; the length of the discretized signal.</p>
+<p>M &#8211; the truncation level for the GAF.</p>
+<p>alpha &#8211; parameter for Paul&#8217;s wavelet.</p>
+<p>A &#8211; bound of the observation window [-A,A].</p>
+</div></blockquote>
+<dl class="method">
+<dt id="hyperbolic.Experiment.sampleWhiteNoise">
+<code class="descname">sampleWhiteNoise</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hyperbolic.Experiment.sampleWhiteNoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample realization of white noise.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hyperbolic.Experiment.performAWT">
+<code class="descname">performAWT</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hyperbolic.Experiment.performAWT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform analytic wavelet transform.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hyperbolic.Experiment.findZeros">
+<code class="descname">findZeros</code><span class="sig-paren">(</span><em>th=0.01</em><span class="sig-paren">)</span><a class="headerlink" href="#hyperbolic.Experiment.findZeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find zeros as local minima that are below a threshold</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hyperbolic.Experiment.plotResults">
+<code class="descname">plotResults</code><span class="sig-paren">(</span><em>boolShow=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hyperbolic.Experiment.plotResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot and save spectrum, signal, and scalogram</p>
+</dd></dl>
+
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="a-complete-example">
+<h1>A complete example<a class="headerlink" href="#a-complete-example" title="Permalink to this headline">¶</a></h1>
+<p>Simply run <cite>examples/example1.py</cite>, which contains</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;../hyperbolic&quot;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">hyperbolic</span> <span class="kn">as</span> <span class="nn">hype</span>
+
+<span class="n">xp</span> <span class="o">=</span> <span class="n">hype</span><span class="o">.</span><span class="n">Experiment</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="c"># initialize experiment, you can play with the parameters, hit shift+TAB for details</span>
+<span class="n">xp</span><span class="o">.</span><span class="n">sampleWhiteNoise</span><span class="p">()</span>
+<span class="n">xp</span><span class="o">.</span><span class="n">performAWT</span><span class="p">()</span>
+<span class="n">xp</span><span class="o">.</span><span class="n">findZeros</span><span class="p">()</span>
+<span class="n">xp</span><span class="o">.</span><span class="n">plotResults</span><span class="p">(</span><span class="n">boolShow</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output should be</p>
+<div class="highlight-python"><div class="highlight"><pre>
+</pre></div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Rémi Bardenet.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.alpha',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+Results of doctest builder run on 2017-10-20 12:30:31
+=====================================================
+
+Document: index
+---------------
+**********************************************************************
+File "index.rst", line 79, in default
+Failed example:
+    xp = hype.Experiment(alpha=2.0)
+    xp.sampleWhiteNoise()
+    xp.performAWT()
+    xp.findZeros()
+    xp.plotResults(boolShow=1)
+Expected:
+    None
+Got:
+    Figures will be saved in the current folder; file names will contain the id "demo".
+    Signals are discretized with N=1024 values, equidistributed along [-A,A], where A=5.
+    The wavelet parameter is alpha=2.0.
+    The truncation level for random series is M=1.00E+05.
+    ### Computing truncated random series in the time domain.
+    ### Computing spectrum.
+    ### Plotting the spectrum of the realization of white noise.
+    ### Plotting the corresponding realization of white noise.
+    ### Plotting the scalogram.
+**********************************************************************
+1 items had failures:
+   1 of   1 in default
+1 tests in 1 items.
+0 passed and 1 failed.
+***Test Failed*** 1 failures.
+
+Doctest summary
+===============
+    1 test
+    1 failure in tests
+    0 failures in setup code
+    0 failures in cleanup code
