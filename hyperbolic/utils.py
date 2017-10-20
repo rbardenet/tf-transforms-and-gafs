@@ -22,7 +22,7 @@ def fourier(f, A):
     F = spf.fftshift(F)         # shift F to align indices and [-A,A]
     freqs = np.arange(-N/2,N/2)/(2*B)
     F *= 2*A/N
-    F /= np.sqrt(2*pi)         # arbitrary normalization
+    F /= np.sqrt(2*np.pi)         # arbitrary normalization
     return freqs, F
 
 def fourierInverse(F, freqMax):
@@ -63,3 +63,43 @@ def extr2minth(M, th):
             
     x, y = np.where(Mid_Mid)
     return x, y
+
+# I copied autoscales from mlpy and only forced J to be an int.
+def autoscales(N, dt, dj, wf, p):
+     """Compute wavelet scales as fractional power of two.
+
+     Args:
+        N -- integer
+           number of data samples
+        dt -- float
+           time step
+        dj -- float
+           scale resolution (smaller values of dj give finer resolution)
+        wf -- string
+           wavelet function ('morlet', 'paul', 'dog')
+        p -- float
+           omega0 ('morlet') or order ('paul', 'dog')
+     
+     Returns:
+        scales -- 1d numpy array
+           scales
+     """
+     
+     if wf == 'dog':
+         s0 = (dt * np.sqrt(p + 0.5)) / np.pi
+     elif wf == 'paul':
+         s0 = (dt * ((2 * p) + 1)) / (2 * np.pi)
+     elif wf == 'morlet':
+         s0 = (dt * (p + np.sqrt(2 + p**2))) / (2 * np.pi)
+     else:
+         raise ValueError('wavelet function not available')
+     
+     #  See (9) and (10) at page 67.
+
+     J = np.floor(dj**-1 * np.log2((N * dt) / s0))
+     s = np.empty(int(J) + 1)
+
+     for i in range(s.shape[0]):
+         s[i] = s0 * 2**(i * dj)
+    
+     return s
