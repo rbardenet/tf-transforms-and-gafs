@@ -25,6 +25,6 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     python --version
 else
 	# Additional installation instructions for UNIX
-    # sudo apt-get install -qq gcc g++
-	echo "Not on osx"
+    sudo apt-get install -qq gcc g++
+	  echo "Not on osx"
 fi
