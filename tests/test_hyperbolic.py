@@ -2,7 +2,7 @@ import pytest
 import sys
 import os
 import glob
-sys.path.append("../hyperbolic")
+sys.path.append("hyperbolic")
 import hyperbolic as hype
 
 def test_Experiment():
