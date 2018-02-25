@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.random as npr
-import mlpy.wavelet as wave
+#import mlpy.wavelet as wave
 import utils
 import laguerre
 import matplotlib as mpl
@@ -11,10 +11,15 @@ class Experiment:
     """Sample an analytic white noise, compute its AWT, and look up its zeros.
 
     Args:
+    -----
         expId -- a string identifying a particular experiment, used for saving results.
+
         N -- the length of the discretized signal.
+
         M -- the truncation level for the GAF.
+
         alpha -- parameter for Paul's wavelet.
+
         A -- bound of the observation window [-A,A].
 
     """
@@ -54,10 +59,37 @@ class Experiment:
                     for l in laguerre.LaguerrePolynomials(M,alpha,self.wArray)], 0)
 
     def performAWT(self):
-        """Perform analytic wavelet transform."""
+        """Approximate Paul's wavelet transform at scale s of f truncated on [-A,A]
+
+        Args:
+            f -- target function evaluated at -A+2A*k/N, k=0..N-1, N should be even.
+            A -- truncation level.
+
+        Returns:
+            freqs -- an array of N frequencies.
+            F -- the array of corresponding approximate values of the Fourier transform.
+        """
+        freqs, F = utils.fourier(self.signal, self.A)
         dt = 2*self.A/self.N
-        self.scales = utils.autoscales(N=self.N, dt=dt, dj=0.1, wf='paul', p=self.alpha+1e-5)
-        self.awt = wave.cwt(x=self.signal, dt=dt, scales=self.scales, wf='paul', p=self.alpha+1e-5)
+        s0 = 2*dt*(2*self.alpha+1)/4/np.pi # 4pi s/(2*alpha+1) should be approx 2dt following [ToCo97]
+        dj = 0.1
+        J = int(1/dj*np.log2(self.N*dt/s0))+1
+        self.scales = [s0*2**(j*dj) for j in range(J)]
+
+        def psiHat(s, omega):
+            """Fourier transform of wavalet psi_alpha evaluated at s*omega"""
+            res = np.zeros(omega.shape)
+            res[omega>=0] = (s*omega[omega>=0])**self.alpha*np.exp(-s*omega[omega>=0])
+            return res
+
+        self.awt = np.array([utils.fourierInverse(F*psiHat(s,freqs), np.max(freqs))[1]
+                for s in self.scales])
+
+#    def performAWT(self):
+#        """Perform analytic wavelet transform."""
+#        dt = 2*self.A/self.N
+#        self.scales = utils.autoscales(N=self.N, dt=dt, dj=0.1, wf='paul', p=self.alpha+1e-5)
+#        self.awt = wave.cwt(x=self.signal, dt=dt, scales=self.scales, wf='paul', p=self.alpha+1e-5)
 
     def findZeros(self, th=0.01):
         """Find zeros as local minima that are below a threshold"""

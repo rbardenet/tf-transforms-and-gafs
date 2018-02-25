@@ -3,7 +3,7 @@ import scipy.fftpack as spf
 
 def fourier(f, A):
     """Approximate the Fourier transform of f truncated on [-A,A] using the discrete Fourier transform.
-    
+
     Args:
         f -- target function evaluated at -A+2A*k/N, k=0..N-1, N should be even.
         A -- truncation level.
@@ -56,15 +56,14 @@ def extr2minth(M, th):
 
     Mid_Mid = np.zeros((C,R), dtype=bool)
 
-    for c in range(1, C-1):   
+    for c in range(1, C-1):
         for r in range(1, R-1):
             T = M[c-1:c+2,r-1:r+2]
             Mid_Mid[c, r] = (np.min(T) == T[1, 1]) * (np.min(T) > th)
-            
+
     x, y = np.where(Mid_Mid)
     return x, y
 
-# I copied autoscales from mlpy and only forced J to be an int.
 def autoscales(N, dt, dj, wf, p):
      """Compute wavelet scales as fractional power of two.
 
@@ -79,12 +78,12 @@ def autoscales(N, dt, dj, wf, p):
            wavelet function ('morlet', 'paul', 'dog')
         p -- float
            omega0 ('morlet') or order ('paul', 'dog')
-     
+
      Returns:
         scales -- 1d numpy array
            scales
      """
-     
+
      if wf == 'dog':
          s0 = (dt * np.sqrt(p + 0.5)) / np.pi
      elif wf == 'paul':
@@ -93,7 +92,7 @@ def autoscales(N, dt, dj, wf, p):
          s0 = (dt * (p + np.sqrt(2 + p**2))) / (2 * np.pi)
      else:
          raise ValueError('wavelet function not available')
-     
+
      #  See (9) and (10) at page 67.
 
      J = np.floor(dj**-1 * np.log2((N * dt) / s0))
@@ -101,5 +100,5 @@ def autoscales(N, dt, dj, wf, p):
 
      for i in range(s.shape[0]):
          s[i] = s0 * 2**(i * dj)
-    
+
      return s
