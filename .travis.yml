@@ -33,7 +33,7 @@ install:
   - python -m easy_install -U setuptools
   - pip install -U pytest
   - pip install sphinx
-  - pip install --process-dependency-links .
+  - pip install .
   
 # Command to run tests. These are run for each configuration
 script: 
