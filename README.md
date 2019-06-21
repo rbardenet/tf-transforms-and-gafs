@@ -1,13 +1,7 @@
 ## hyperbolic
 
-This project is the companion code to the paper XXX.
-
-[![CheckHowThisButtonIsDoneToAdaptItToYourProject](https://travis-ci.org/[your_username]/[project_name].svg?branch=[branch_to_test])](https://travis-ci.org/[your_username]/[project_name])
-
-
-> project description
-
-_hyperbolic_ is a Python 3 library implementing Paul's continuous wavelet transform of an analytic white Gaussian noise, see XXX for details.
+_hyperbolic_ is a Python 3 library implementing time-frequency transforms that map specific white noises to canonical Gaussian analytic functions. _hyperbolic_ is the companion package to the paper
+> Rémi Bardenet and Adrien Hardy, Time-frequency transforms of white noises and Gaussian analytic functions, to appear in Applied and Computational Harmonic Analysis (ACHA), [arxiv preprint](https://arxiv.org/abs/1807.11554).
 
 ### Install from sources
 
