@@ -1,109 +1,78 @@
 import numpy as np
 import numpy.random as npr
-#import mlpy.wavelet as wave
 import utils
-import laguerre
+import charlier
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from decimal import Decimal
+import scipy.fftpack as spf
+import cmath as cm
+from scipy.interpolate import interp2d
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-class Experiment:
-    """Sample an analytic white noise, compute its AWT, and look up its zeros.
+class PlanarExperiment:
+    """
+    Sample a discrete white noise, compute its Chalier transfom, and look up its zeros.
 
     Args:
     -----
         expId -- a string identifying a particular experiment, used for saving results.
-
         N -- the length of the discretized signal.
-
-        M -- the truncation level for the GAF.
-
-        alpha -- parameter for Paul's wavelet.
-
-        A -- bound of the observation window [-A,A].
-
+        lambda -- parameter for Charlier base measure.
     """
 
-    def __init__(self, expId="demo", N=2**10, M=10**5, alpha=0., A=5):
+    def __init__(self, expId="demo", N=2**8, llambda=1.):
         self.expId = expId
         self.N = N
-        self.M = M
-        self.alpha = alpha
-        self.A = A
-        self.tArray = np.linspace(-A,A,N)
-        self.dt = 2*A/N
+        self.llambda = llambda
 
         print("Figures will be saved in the current folder; file names will contain the id \""+expId+"\".")
-        print("Signals are discretized with N="+str(N), "values, equidistributed along [-A,A], where A="+str(A)+'.')
-        print("The wavelet parameter is alpha="+str(alpha)+'.')
-        print("The truncation level for random series is M="+'%.2E' % Decimal(str(M))+'.')
+        print("The Poisson parameter is lambda="+str(llambda)+'.')
 
-    def sampleWhiteNoise(self):
+    def sampleWhiteNoise(self, seed=1):
+        npr.seed(seed)
         """Sample realization of white noise."""
-        M = self.M
-        alpha = self.alpha
-        tArray = self.tArray
+        N = self.N
+        self.signal = 1/np.sqrt(2)*(npr.randn(N)+1J*npr.randn(N))
 
-        # Compute truncated random series in the time domain
-        print("### Computing truncated random series in the time domain.")
-        sd = npr.seed()
-        self.signal = np.sum([1/np.sqrt(2)*(npr.randn()+1J*npr.randn())*s
-                    for s in laguerre.IFLaguerreFunctions(M,alpha,tArray)], 0)
-
-        # Compute the same series in the frequency domain, and avoid Fourier
-        print("### Computing spectrum.")
-        npr.seed(sd)
-        freqs, _ = utils.fourier(self.signal, self.A)
-        self.wArray = np.linspace(0, freqs[-1], len(freqs))
-        self.spectrum = np.sum([1/np.sqrt(2)*(npr.randn()+1J*npr.randn())*l*np.sqrt(laguerre.mu(alpha,self.wArray))
-                    for l in laguerre.LaguerrePolynomials(M,alpha,self.wArray)], 0)
-
-    def performAWT(self):
-        """Approximate Paul's wavelet transform at scale s of f truncated on [-A,A]
-
-        Args:
-            f -- target function evaluated at -A+2A*k/N, k=0..N-1, N should be even.
-            A -- truncation level.
-
-        Returns:
-            freqs -- an array of N frequencies.
-            F -- the array of corresponding approximate values of the Fourier transform.
+    def transform(self):
         """
-        freqs, F = utils.fourier(self.signal, self.A)
-        dt = 2*self.A/self.N
-        s0 = 2*dt*(2*self.alpha+1)/4/np.pi # 4pi s/(2*alpha+1) should be approx 2dt following [ToCo97]
-        dj = 0.1
-        J = int(1/dj*np.log2(self.N*dt/s0))+1
-        self.scales = [s0*2**(j*dj) for j in range(J)]
-
-        def psiHat(s, omega):
-            """Fourier transform of wavalet psi_alpha evaluated at s*omega"""
-            res = np.zeros(omega.shape)
-            res[omega>=0] = (s*omega[omega>=0])**self.alpha*np.exp(-s*omega[omega>=0])
-            return res
-
-        self.awt = np.array([utils.fourierInverse(F*psiHat(s,freqs), np.max(freqs))[1]
-                for s in self.scales])
-
-#    def performAWT(self):
-#        """Perform analytic wavelet transform."""
-#        dt = 2*self.A/self.N
-#        self.scales = utils.autoscales(N=self.N, dt=dt, dj=0.1, wf='paul', p=self.alpha+1e-5)
-#        self.awt = wave.cwt(x=self.signal, dt=dt, scales=self.scales, wf='paul', p=self.alpha+1e-5)
+        Approximate the Charlier transform at different radii $r$
+        """
+        N = len(self.signal)
+        self.rArray = np.linspace(1e-3, np.sqrt(N), 1000) # N/4 chosen so that Poisson has support within cut
+        self.spectrogram = np.array([spf.fftshift(spf.ifft(np.conjugate(self.signal)*
+                        charlier.cmp(r, np.arange(N)))) for r in self.rArray]).T
+        np.flip(self.spectrogram, axis=0) # put small thetas at the bottom for later display
+        self.spectrogram /= np.max(np.abs(self.spectrogram))
 
     def findZeros(self, th=0.01):
-        """Find zeros as local minima that are below a threshold"""
-        zeros = utils.extr2minth(np.abs(self.awt), th)
-        self.zerosComplex = np.array([[self.tArray[zeros[1][i]] + 1J *self.scales[zeros[0][i]]]
-                                      for i in range(len(zeros[0]))])
+        """
+        Find zeros as local minima that are below a threshold
+        """
+        zeros = utils.extr2minth(np.abs(self.spectrogram), th)
+        self.thetaArray = -np.pi+2*np.pi*np.arange(self.N)/self.N
+        self.zerosPolar = [[self.rArray[zeros[1][i]], self.thetaArray[zeros[0][i]]]
+                                      for i in range(len(zeros[0]))]
 
-    def plotResults(self, boolShow=False):
-        """Plot and save spectrum, signal, and scalogram"""
+    def findMaxima(self, patchSize=3):
+        """
+        Find maxima, patchSize should be odd
+        """
+        maxima = utils.extr2max(np.abs(self.spectrogram), patchSize)
+        self.thetaArray = -np.pi+2*np.pi*np.arange(self.N)/self.N
+        self.maximaPolar = [[self.rArray[maxima[1][i]], self.thetaArray[maxima[0][i]]]
+                                      for i in range(len(maxima[0]))]
 
-        # set plotting options
-        mpl.rcParams['xtick.labelsize'] = 22;
-        mpl.rcParams['ytick.labelsize'] = 22;
-        plt.rc('axes', labelsize=22);
+    def plotResults(self, boolShow=False, boolSave=1):
+        """
+        plot and save spectrogram, in its computationally-friendly coordinates
+        """
+
+        # Set plotting options
+        mpl.rcParams['xtick.labelsize'] = 26;
+        mpl.rcParams['ytick.labelsize'] = 26;
+        plt.rc('axes', labelsize=26);
         plt.rc('legend', fontsize=18);
         #plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0));
         #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0));
@@ -111,62 +80,100 @@ class Experiment:
         mpl.rcParams['pdf.use14corefonts'] = True;
         mpl.rcParams['text.usetex'] = True;
 
-        # plot the spectrum of our white noise
-        print("### Plotting the spectrum of the realization of white noise.")
+        # Plot the sprectrogram
+        print("### Plotting the spectrogram.")
         plt.figure(figsize=(22,12))
-        plt.subplot(2,1,1)
-        plt.plot(self.wArray, np.real(self.spectrum), label="Re")
-        plt.legend()
-        plt.subplot(2,1,2)
-        plt.plot(self.wArray, np.imag(self.spectrum), color='g', label="Im")
-        plt.legend()
+        rArray = self.rArray
+        thetaArray = self.thetaArray
+        extent = [rArray[0], rArray[-1], thetaArray[-1], thetaArray[0]]
         ax = plt.gca()
-        ax.set_xlabel(r"$\omega$")
-        ax.set_ylabel("spectrum")
-        plt.savefig("spectrum_"+self.expId+"_alpha="+str(self.alpha)+".pdf")
-        plt.savefig("spectrum_"+self.expId+"_alpha="+str(self.alpha)+".eps")
-        if boolShow:
-            plt.show()
+        pl = ax.imshow(np.abs(self.spectrogram), interpolation='nearest', aspect="auto",
+                                    cmap="viridis", extent=extent)
 
-        # plot the white noise itself
-        print("### Plotting the corresponding realization of white noise.")
-        plt.figure(figsize=(22,12))
-        plt.subplot(2,1,1)
-        plt.plot(self.tArray, np.real(self.signal), label="Re")
-        plt.xlim([-self.A, self.A])
-        plt.legend()
-        plt.subplot(2,1,2)
-        plt.plot(self.tArray, np.imag(self.signal), color='g', label="Im")
-        plt.legend()
-        plt.xlim([-self.A, self.A])
-        ax = plt.gca()
-        ax.set_xlabel(r"$t$")
-        ax.set_ylabel("signal")
-        plt.savefig("signal_"+self.expId+"_alpha="+str(self.alpha)+".pdf")
-        plt.savefig("signal_"+self.expId+"_alpha="+str(self.alpha)+".eps")
-        if boolShow:
-            plt.show()
+        # Add the zeros
+        for i in range(len(self.zerosPolar)):
+            x, y = self.zerosPolar[i]
+            ax.plot(x, y, 'o', color="white")
+        # Add the maxima
+        for i in range(len(self.maximaPolar)):
+            x, y = self.maximaPolar[i]
+            ax.plot(x, y, 'o', color="red")
 
-        # plot the scalogram
-        print("### Plotting the scalogram.")
-        plt.figure(figsize=(22,12))
-        tArray = self.tArray
-        scales = self.scales
-        extent = [tArray[0],tArray[-1],np.log10(scales[-1]), np.log10(scales[0])]
-        ax = plt.gca()
-        pl = ax.imshow(np.abs(self.awt)/self.M, interpolation='nearest', aspect="auto", cmap="viridis", extent=extent)
-
-        # add the zeros
-        for i in range(len(self.zerosComplex)):
-            z = self.zerosComplex[i]
-            x, y = np.real(z), np.imag(z)
-            ax.plot(x, np.log10(y), 'o', color="white")
-        ax.set_xlim(tArray[0], tArray[-1])
-        ax.set_ylim(np.log10(scales[0]), np.log10(scales[-1]))
-        ax.set_xlabel(r"$t$")
-        ax.set_ylabel(r"$\log s$")
+        ax.set_xlim(rArray[0], rArray[-1])
+        ax.set_ylim(thetaArray[0], thetaArray[-1])
+        plt.yticks(-np.pi+np.pi*np.arange(5)/2., ["$-\pi$", "$-\pi/2$", "0", "$\pi/2$", "$\pi$"])
+        ax.set_xlabel(r"$r$")
+        ax.set_ylabel(r"$\theta$")
         plt.colorbar(pl, orientation='horizontal')
-        plt.savefig("scalogram_"+self.expId+"_alpha="+str(self.alpha)+".pdf")
-        plt.savefig("scalogram_"+self.expId+"_alpha="+str(self.alpha)+".eps")
+
+        # Add the maximaPolar
+
+        # Save and display
+        if boolSave:
+            plt.savefig("spectrogram_charlier_"+self.expId+"_lambda="+str(self.llambda)+".pdf")
+            plt.savefig("spectrogram_charlier_"+self.expId+"_lambda="+str(self.llambda)+".eps")
+        if boolShow:
+            plt.show()
+
+    def plotTransformedResults(self, boolShow=False, boolDemo=False):
+        """
+        plot and save the spectrogram in its natural coordinates
+        """
+
+        # Interpolate the spectrogram
+        rs = self.rArray
+        thetas = self.thetaArray
+        fr = interp2d(rs, thetas, np.real(self.spectrogram), kind="cubic")
+        fi = interp2d(rs, thetas, np.imag(self.spectrogram), kind="cubic")
+        f = lambda z: fr(np.abs(z), cm.phase(z))+1J*fi(np.abs(z),cm.phase(z))
+
+        # Compute the spectrogram in natural coordinates
+        self.phi = lambda z: np.sqrt(self.llambda)-z # phi is its own inverse
+        m = np.max(self.rArray)+1
+        xx = np.linspace(-m, m, 500)
+        X, Y = np.meshgrid(xx, xx)
+        Z = np.zeros(X.shape)
+        for i in range(Z.shape[0]):
+            for j in range(Z.shape[1]):
+                Z[i,j] = np.abs(f(self.phi(X[i,j]+1J*Y[i,j])))
+        zmin = np.min(Z)
+        zmax = np.max(Z)
+        Z = (Z-zmin)/(zmax-zmin) # normalize spectrogram for plotting purposes
+
+        # Plot the spectrogram
+        fig = plt.figure(figsize=3*plt.figaspect(1.))
+        ax = fig.add_subplot(111)
+        extent = [xx[0], xx[-1], xx[-1], xx[0]]
+        ax = plt.gca()
+        pl = ax.imshow(Z, interpolation='nearest', aspect="auto",
+                                            cmap="viridis", extent=extent)
+        if not boolDemo:
+            # Add colorbar while maintaining aspect ratio
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="5%", pad=0.1)
+            fig.colorbar(pl, cax=cax)
+
+        # Add the zeros
+        for i in range(len(self.zerosPolar)):
+            r, theta = self.zerosPolar[i]
+            z = self.phi(cm.rect(r, theta))
+            ax.plot(np.real(z), np.imag(z), 'o', markersize=10, color="white")
+
+        # Add maxima
+        #for i in range(len(self.maximaPolar)):
+        #    r, theta = self.maximaPolar[i]
+        #    z = self.phi(cm.rect(r, theta))
+        #    ax.plot(np.real(z), np.imag(z), 'o', markersize=10, color="red")
+
+
+        if boolDemo:
+            # Crop the plot to give the illusion of the full planar GAF
+            plt.xlim(-10,10)
+            plt.ylim(-10,10)
+            ax.set_axis_off()  # Turn off the axis planes
+
+        # Save and display
+        plt.savefig("spectrogram_charlier_natural_"+self.expId+"_lambda="+str(self.llambda)+".pdf")
+        plt.savefig("spectrogram_charlier_natural_"+self.expId+"_lambda="+str(self.llambda)+".eps")
         if boolShow:
             plt.show()

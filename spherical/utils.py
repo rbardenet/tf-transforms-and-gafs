@@ -54,8 +54,9 @@ def extr2minth(M, th):
 
     C,R = M.shape
     maxM = np.max(M)
-    if th > maxM/10:
-        th = maxM/10 # reset threshold for minima if needed
+    if th > maxM/2:
+        print("Threshold seems too high, we reset it to th =", maxM/2) # reset threshold for minima if needed
+        th = maxM/2
 
     Mid_Mid = np.zeros((C,R), dtype=bool)
 

@@ -53,13 +53,42 @@ def extr2minth(M, th):
     """
 
     C,R = M.shape
+    maxM = np.max(M)
+    if th > maxM/10:
+        th = maxM/10 # reset threshold for minima if needed
 
     Mid_Mid = np.zeros((C,R), dtype=bool)
 
     for c in range(1, C-1):
         for r in range(1, R-1):
             T = M[c-1:c+2,r-1:r+2]
-            Mid_Mid[c, r] = (np.min(T) == T[1, 1]) * (np.min(T) > th)
+            Mid_Mid[c, r] = (np.min(T) == T[1, 1]) * (np.min(T) < th)
+
+    x, y = np.where(Mid_Mid)
+    return x, y
+
+def extr2max(M, patchSize):
+    """Extract maxima over a small patch.
+
+    Args:
+        M -- array of values from which to extract minima
+        patchSize -- size in pixels of the patch
+
+    Returns:
+        x -- array of first coordinates of zeros
+        y -- array of second coordinates of zeros
+    """
+
+    C,R = M.shape
+    maxM = np.max(M)
+
+    Mid_Mid = np.zeros((C,R), dtype=bool)
+    halfWidth = patchSize//2
+
+    for c in range(halfWidth, C-halfWidth):
+        for r in range(halfWidth, R-halfWidth):
+            T = M[c-halfWidth:c+halfWidth+1,r-halfWidth:r+halfWidth+1]
+            Mid_Mid[c, r] = (np.max(T) == T[halfWidth, halfWidth])
 
     x, y = np.where(Mid_Mid)
     return x, y

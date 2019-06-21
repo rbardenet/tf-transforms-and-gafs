@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.fftpack as spf
+import matplotlib as mpl
 
 def fourier(f, A):
     """Approximate the Fourier transform of f truncated on [-A,A] using the discrete Fourier transform.
@@ -53,14 +54,16 @@ def extr2minth(M, th):
     """
 
     C,R = M.shape
+    maxM = np.max(M)
+    if th >= maxM/10:
+        th = maxM/10 # Set threshold for minima
 
     Mid_Mid = np.zeros((C,R), dtype=bool)
 
     for c in range(1, C-1):
         for r in range(1, R-1):
             T = M[c-1:c+2,r-1:r+2]
-            Mid_Mid[c, r] = (np.min(T) == T[1, 1]) * (np.min(T) > th)
-
+            Mid_Mid[c, r] = (np.min(T) == T[1, 1]) * (T[1, 1] < th)
     x, y = np.where(Mid_Mid)
     return x, y
 

@@ -84,6 +84,7 @@ class Experiment:
 
         self.awt = np.array([utils.fourierInverse(F*psiHat(s,freqs), np.max(freqs))[1]
                 for s in self.scales])
+        self.awt /= np.sum(np.abs(self.awt))
 
 #    def performAWT(self):
 #        """Perform analytic wavelet transform."""
@@ -97,7 +98,7 @@ class Experiment:
         self.zerosComplex = np.array([[self.tArray[zeros[1][i]] + 1J *self.scales[zeros[0][i]]]
                                       for i in range(len(zeros[0]))])
 
-    def plotResults(self, boolShow=False):
+    def plotResults(self, boolShow=False, boolDemo=False):
         """Plot and save spectrum, signal, and scalogram"""
 
         # set plotting options
@@ -131,41 +132,51 @@ class Experiment:
         # plot the white noise itself
         print("### Plotting the corresponding realization of white noise.")
         plt.figure(figsize=(22,12))
-        plt.subplot(2,1,1)
-        plt.plot(self.tArray, np.real(self.signal), label="Re")
-        plt.xlim([-self.A, self.A])
-        plt.legend()
-        plt.subplot(2,1,2)
-        plt.plot(self.tArray, np.imag(self.signal), color='g', label="Im")
-        plt.legend()
-        plt.xlim([-self.A, self.A])
-        ax = plt.gca()
-        ax.set_xlabel(r"$t$")
-        ax.set_ylabel("signal")
-        plt.savefig("signal_"+self.expId+"_alpha="+str(self.alpha)+".pdf")
-        plt.savefig("signal_"+self.expId+"_alpha="+str(self.alpha)+".eps")
-        if boolShow:
-            plt.show()
+        if not boolDemo:
+            plt.subplot(2,1,1)
+            plt.plot(self.tArray, np.real(self.signal), label="Re")
+            plt.xlim([-self.A, self.A])
+            plt.legend()
+            plt.subplot(2,1,2) # prepare for scalogram
+            plt.plot(self.tArray, np.imag(self.signal), color='g', label="Im")
+            plt.xlim([-self.A, self.A])
+            ax = plt.gca()
+            ax.set_xlabel(r"$t$")
+            ax.set_ylabel("signal")
+
+            plt.savefig("signal_"+self.expId+"_alpha="+str(self.alpha)+".pdf")
+            plt.savefig("signal_"+self.expId+"_alpha="+str(self.alpha)+".eps")
+            if boolShow:
+                plt.show()
 
         # plot the scalogram
         print("### Plotting the scalogram.")
-        plt.figure(figsize=(22,12))
+        #plt.figure(figsize=(22,12))
+        plt.figure(figsize=(28,10))
         tArray = self.tArray
         scales = self.scales
         extent = [tArray[0],tArray[-1],np.log10(scales[-1]), np.log10(scales[0])]
         ax = plt.gca()
-        pl = ax.imshow(np.abs(self.awt)/self.M, interpolation='nearest', aspect="auto", cmap="viridis", extent=extent)
+        pl = ax.imshow(np.sqrt(np.abs(self.awt)), interpolation='nearest', aspect="auto", cmap="viridis", extent=extent)
 
-        # add the zeros
+        # Add the zeros
+        print("There are ", len(self.zerosComplex), "zeros.")
         for i in range(len(self.zerosComplex)):
             z = self.zerosComplex[i]
             x, y = np.real(z), np.imag(z)
-            ax.plot(x, np.log10(y), 'o', color="white")
+            ax.plot(x, np.log10(y),'o', markersize=7, color="white")
+
+        # Adjust window
         ax.set_xlim(tArray[0], tArray[-1])
         ax.set_ylim(np.log10(scales[0]), np.log10(scales[-1]))
-        ax.set_xlabel(r"$t$")
-        ax.set_ylabel(r"$\log s$")
-        plt.colorbar(pl, orientation='horizontal')
+
+        if not boolDemo:
+            ax.set_xlabel(r"$t$")
+            ax.set_ylabel(r"$\log s$")
+            plt.colorbar(pl, orientation='horizontal')
+        else:
+            ax.set_axis_off()  # Don't show the axes
+
         plt.savefig("scalogram_"+self.expId+"_alpha="+str(self.alpha)+".pdf")
         plt.savefig("scalogram_"+self.expId+"_alpha="+str(self.alpha)+".eps")
         if boolShow:

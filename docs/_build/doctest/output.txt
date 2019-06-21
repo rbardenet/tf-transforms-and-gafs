@@ -1,4 +1,4 @@
-Results of doctest builder run on 2017-10-20 12:30:31
+Results of doctest builder run on 2017-10-24 11:04:39
 =====================================================
 
 Document: index
@@ -11,6 +11,7 @@ Failed example:
     xp.performAWT()
     xp.findZeros()
     xp.plotResults(boolShow=1)
+    print()
 Expected:
     None
 Got:
@@ -23,6 +24,7 @@ Got:
     ### Plotting the spectrum of the realization of white noise.
     ### Plotting the corresponding realization of white noise.
     ### Plotting the scalogram.
+
 **********************************************************************
 1 items had failures:
    1 of   1 in default

@@ -43,6 +43,7 @@ The output should be
     xp.performAWT()
     xp.findZeros()
     xp.plotResults(boolShow=1)
+    print()
 
 .. testoutput::
 
