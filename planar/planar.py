@@ -25,6 +25,7 @@ class PlanarExperiment:
         self.expId = expId
         self.N = N
         self.llambda = llambda
+        self.phi = lambda z: np.sqrt(self.llambda)-z # phi is its own inverse
 
         print("Figures will be saved in the current folder; file names will contain the id \""+expId+"\".")
         print("The Poisson parameter is lambda="+str(llambda)+'.')
@@ -63,6 +64,19 @@ class PlanarExperiment:
         self.thetaArray = -np.pi+2*np.pi*np.arange(self.N)/self.N
         self.maximaPolar = [[self.rArray[maxima[1][i]], self.thetaArray[maxima[0][i]]]
                                       for i in range(len(maxima[0]))]
+
+    def getZerosInCartesianCoordinates(self):
+        """
+        Return a realization of the list of zeros of the planar GAF
+        """
+        rArray = self.rArray
+        thetaArray = self.thetaArray
+        zeros = []
+        for i in range(len(self.zerosPolar)):
+            r, theta = self.zerosPolar[i]
+            z = self.phi(cm.rect(r, theta))
+            zeros.append([np.real(z), np.imag(z)])
+        return zeros
 
     def plotResults(self, boolShow=False, boolSave=1):
         """
@@ -128,7 +142,6 @@ class PlanarExperiment:
         f = lambda z: fr(np.abs(z), cm.phase(z))+1J*fi(np.abs(z),cm.phase(z))
 
         # Compute the spectrogram in natural coordinates
-        self.phi = lambda z: np.sqrt(self.llambda)-z # phi is its own inverse
         m = np.max(self.rArray)+1
         xx = np.linspace(-m, m, 500)
         X, Y = np.meshgrid(xx, xx)
